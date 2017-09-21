@@ -26,6 +26,8 @@ var state = {
 	[null, null, null, null, null, null, null, null]
 	],
 	captures: {w: 2, b: 2},
+	blackLegal:true,
+	whiteLegal:true
 }
 
 /**@function checkLegal
@@ -53,7 +55,7 @@ function checkLegal(x, y, length, color, dir){
 				check = checkLegal(x, y + 1, length + 1, state.turn, dir);
 			}
 			else if (dir === 'upright'){
-				check = chechLegal(x + 1, y - 1, length + 1, color, dir);
+				check = checkLegal(x + 1, y - 1, length + 1, color, dir);
 			}
 			else if (dir === 'downright'){
 				check = checkLegal(x + 1, y + 1, length + 1, color, dir);
@@ -109,7 +111,7 @@ function checkLegal(x, y, length, color, dir){
 			check = checkLegal(x, y + 1, length + 1, state.turn, dir);
 		}
 		else if (dir === 'upright'){
-			check = chechLegal(x + 1, y - 1, length + 1, color, dir);
+			check = checkLegal(x + 1, y - 1, length + 1, color, dir);
 		}
 		else if (dir === 'downright'){
 			check = checkLegal(x + 1, y + 1, length + 1, color, dir);
@@ -121,7 +123,7 @@ function checkLegal(x, y, length, color, dir){
 			check = checkLegal(x - 1, y + 1, length + 1, color, dir);
 		}
 		if(check === 1){
-			var piece = getElementById('piece-' + x + '-' + y);
+			var piece = document.getElementById('piece-' + x + '-' + y);
 			if(color === 'w'){
 				piece.classList.remove('piece-b');
 				piece.classList.add('piece-w');
@@ -136,6 +138,83 @@ function checkLegal(x, y, length, color, dir){
 				state.captures.b = state.captures.b + 1;
 				state.captures.w = state.captures.w - 1;
 			}
+			return 1;
+		}
+		else return 0;
+	}
+}
+
+/**@function legalTest
+* Checks that an initial piece has a legal move in the predetermined direction.
+*/
+function legalTest(x, y, length, color, dir){
+	if(x > 7 || x < 0 || y > 7 || y < 0) return 0;
+	if(length === 1 && state.board[y][x] === null) return 0;
+	var check = 0;
+	if(length === 1){
+		if(state.board[y][x] !== color){
+			if(dir === 'right'){
+				check = legalTest(x + 1, y, length+1, color, dir);
+			}
+			else if (dir === 'left'){
+				check = legalTest(x - 1, y, length + 1, color, dir)
+			}
+			else if (dir === 'up'){
+				check = legalTest(x, y - 1, length + 1, state.turn, dir);
+			}
+			else if (dir === 'down'){
+				check = legalTest(x, y + 1, length + 1, state.turn, dir);
+			}
+			else if (dir === 'upright'){
+				check = legalTest(x + 1, y - 1, length + 1, color, dir);
+			}
+			else if (dir === 'downright'){
+				check = legalTest(x + 1, y + 1, length + 1, color, dir);
+			}
+			else if (dir === 'upleft'){
+				check = legalTest(x - 1, y - 1, length + 1, color, dir);
+			}
+			else{
+				check = legalTest(x - 1, y + 1, length + 1, color, dir);
+			}
+			if(check === 1){
+				return 1;
+			}
+			else return 0;
+		}
+		else{
+			return 0;
+		}
+	}
+	else if(state.board[y][x] === null){
+		return 1;
+	}
+	else{
+		if(dir === 'right'){
+			check = legalTest(x + 1, y, length+1, color, dir);
+		}
+		else if (dir === 'left'){
+			check = legalTest(x - 1, y, length + 1, color, dir)
+		}
+		else if (dir === 'up'){
+			check = legalTest(x, y - 1, length + 1, color, dir);
+		}
+		else if (dir === 'down'){
+			check = legalTest(x, y + 1, length + 1, color, dir);
+		}
+		else if (dir === 'upright'){
+			check = legalTest(x + 1, y - 1, length + 1, color, dir);
+		}
+		else if (dir === 'downright'){
+			check = legalTest(x + 1, y + 1, length + 1, color, dir);
+		}
+		else if (dir === 'upleft'){
+			check = legalTest(x - 1, y - 1, length + 1, color, dir);
+		}
+		else{
+			check = legalTest(x - 1, y + 1, length + 1, color, dir);
+		}
+		if(check === 1){
 			return 1;
 		}
 		else return 0;
@@ -158,12 +237,83 @@ function checkBoard(x, y){
 	return check;
 }
 
+function checkForVictoryWhite(){
+	for(var y = 0; y < state.board.length; y++){
+		for(var x = 0; x < state.board[y].length; x++){
+			for(var c = 0; c < 8; c++){
+				var check = 0;
+				if(c === 0)check = legalTest(x + 1, y, 1, 'w', 'right');
+				else if (c === 1) check = legalTest(x - 1, y, 1, 'w', 'left');
+				else if (c === 2) check = legalTest(x, y - 1, 1, 'w', 'up');
+				else if (c === 3) check = legalTest(x, y + 1, 1, 'w', 'down');
+				else if (c === 4) check = legalTest(x + 1, y - 1, 1, 'w', 'upright');
+				else if (c === 5) check = legalTest(x + 1, y + 1, 1, 'w', 'downright');
+				else if (c === 6) check = legalTest(x - 1, y - 1, 1, 'w', 'upleft');
+				else check = legalTest(x - 1, y + 1, 1, 'w', 'downleft');
+				if(check === 1){
+					state.whiteLegal = true;
+					return 1;
+				}
+			}
+		}
+	}
+	state.whiteLegal = false;
+	return 0;
+}
+
+function checkForVictoryBlack(){
+	for(var y = 0; y < state.board.length; y++){
+		for(var x = 0; x < state.board[y].length; x++){
+			for(var c = 0; c < 8; c++){
+				var check = 0;
+				if(c === 0)check = legalTest(x + 1, y, 1, 'b', 'right');
+				else if (c === 1) check = legalTest(x - 1, y, 1, 'b', 'left');
+				else if (c === 2) check = legalTest(x, y - 1, 1, 'b', 'up');
+				else if (c === 3) check = legalTest(x, y + 1, 1, 'b', 'down');
+				else if (c === 4) check = legalTest(x + 1, y - 1, 1, 'b', 'upright');
+				else if (c === 5) check = legalTest(x + 1, y + 1, 1, 'b', 'downright');
+				else if (c === 6) check = legalTest(x - 1, y - 1, 1, 'b', 'upleft');
+				else check = legalTest(x - 1, y + 1, 1, 'b', 'downleft');
+				if(check === 1){
+					state.blackLegal = true;
+					return 1;
+				}
+			}
+		}
+	}
+	state.blackLegal = false;
+	return 0;
+}
+
+function checkForVictory(){
+	var legal = [0,0];
+	legal[0] = checkForVictoryBlack();
+	legal[1] = checkForVictoryWhite();
+	return legal;
+}
+
 /** @function nextTurn
 * switches to the next turn
 */
 function nextTurn(){
-	if(state.turn === 'b') state.turn = 'w';
-	else state.turn = 'b';
+	if(state.turn === 'b'){
+		if(state.whiteLegal){
+			state.turn = 'w';
+			//Text entry
+		}
+		else{
+			console.log('white has no legal moves, still black turn');
+		}
+	}
+	else {
+		if(state.blackLegal){
+			state.turn = 'b';
+			//Text entry
+		}
+		else{
+			console.log('black has no legal moves, still white turn');
+		}
+	}
 }
 
 function handleSquareClick(event){
@@ -187,11 +337,30 @@ function handleSquareClick(event){
 			state.board[y][x] = state.turn;
 			if(state.turn === 'w') state.captures.w = state.captures.w + 1;
 			else state.captures.b = state.captures.b + 1;
-			nextTurn();
+			var result = checkForVictory();
+			if(result[0] === 0 && result[1] === 0){
+				state.over = true;
+				if(state.captures.w > state.captures.b){
+					console.log('white wins');
+					//Textbox
+				}
+				else if (state.captures.b > state.captures.w){
+					console.log('black wins');
+				}
+				else{
+					console.log('tie');
+				}
+			}
+			else{
+				nextTurn();
+			}
 		}
 		else{
 			console.log("no legal move");
 		}
+	}
+	else{
+		console.log('not allowed');
 	}
 }
 
