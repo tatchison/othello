@@ -299,24 +299,29 @@ function nextTurn(){
 	if(state.turn === 'b'){
 		if(state.whiteLegal){
 			state.turn = 'w';
-			//Text entry
+			var t = document.getElementById('message');
+			t.textContent = "White's turn";
 		}
 		else{
-			console.log('white has no legal moves, still black turn');
+			var t = document.getElementById('message');
+			t.textContent = "White has no legal moves. Still Black's turn.";
 		}
 	}
 	else {
 		if(state.blackLegal){
 			state.turn = 'b';
-			//Text entry
+			var t = document.getElementById('message');
+			t.textContent = "Black's turn";
 		}
 		else{
-			console.log('black has no legal moves, still white turn');
+			var t = document.getElementById('message');
+			t.textContent = "Black has no legal moves. Still White's turn.";
 		}
 	}
 }
 
 function handleSquareClick(event){
+	if (state.over) return;
 	event.preventDefault();
 	var id = event.target.id;
 	var x = parseInt(id.charAt(7));
@@ -340,15 +345,15 @@ function handleSquareClick(event){
 			var result = checkForVictory();
 			if(result[0] === 0 && result[1] === 0){
 				state.over = true;
+				var t = document.getElementById('message');
 				if(state.captures.w > state.captures.b){
-					console.log('white wins');
-					//Textbox
+					t.text = "White wins!!";
 				}
 				else if (state.captures.b > state.captures.w){
-					console.log('black wins');
+					t.text = "Black wins!!";
 				}
 				else{
-					console.log('tie');
+					t.text = "Tie!!";
 				}
 			}
 			else{
@@ -385,9 +390,13 @@ function startGame(){
 				piece.classList.add('piece-' + state.board[y][x]);
 				square.appendChild(piece);
 			}
-			//maybe remove initial pieces for Reversi??
 		}
 	}
+	var t = document.createElement('p');
+	t.id = 'message';
+	t.classList.add('text');
+	t.textContent = "Black's turn";
+	document.body.appendChild(t);
 }
 
 startGame();
